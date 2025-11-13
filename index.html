@@ -106,12 +106,24 @@
       border: 2px solid #555;
       color: #fff;
     }
+
+    .comment-box {
+      background-color: #1f1f1f;
+      border: 1px solid #555;
+      border-radius: 0;
+      padding: 12px;
+      margin-top: 15px;
+      font-size: 14px;
+      color: #ccc;
+      width: 300px;
+      margin: 15px auto;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
-
     <h1>CDCULT Distribution</h1>
     <h2>УЗНАТЬ СОСТОЯНИЕ РЕЛИЗА</h2>
 
@@ -120,18 +132,15 @@
     <div class="input-container" id="formContainer"></div>
 
     <div class="status" id="statusOutput"></div>
+    <div class="comment-box" id="commentBox" style="display: none;"></div>
 
   </div>
 
   <script>
-    // ⚠️ ЗАМЕНИТЕ на ваш URL от Google Apps Script
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjvB_u2ok2UgkKEkKuFMwZT5L0LwO_xFLbiEyXENLfx72zkCcL6wf41jCRrHfq0HA/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxys4UPOAtqyKWbm-JXu0IAW9BMkGZtIHP5iZr6scDZdfU9KK5AQ3RkckEJmz-GKQA/exec';
 
     document.getElementById('showForm').addEventListener('click', () => {
-      // Скрываем кнопку "УЗНАТЬ"
       document.getElementById('showForm').style.display = 'none';
-
-      // Показываем поля ввода
       const formContainer = document.getElementById('formContainer');
       formContainer.style.display = 'block';
       formContainer.innerHTML = `
@@ -139,8 +148,6 @@
         <input type="text" class="input-field" id="mainArtists" placeholder="Основные артисты">
         <button class="btn" id="submitForm">ПРОВЕРИТЬ</button>
       `;
-
-      // Привязываем событие к новой кнопке "ПРОВЕРИТЬ"
       document.getElementById('submitForm').addEventListener('click', checkStatus);
     });
 
@@ -156,22 +163,28 @@
       fetch(SCRIPT_URL)
         .then(response => response.json())
         .then(data => {
-          // 🔍 ТОЧНОЕ СОВПАДЕНИЕ по названию и артистам
           const found = data.find(item =>
             item.releaseName === releaseName &&
             item.mainArtists === mainArtists
           );
 
           const statusDiv = document.getElementById('statusOutput');
+          const commentBox = document.getElementById('commentBox');
+          commentBox.style.display = 'none'; // Сначала скрываем
 
           if (found) {
             const status = found.statusColor;
+
             if (status === 'green') {
-              statusDiv.textContent = 'ОДОБРЕН';
+              statusDiv.textContent = 'ОТПРАВЛЕН';
               statusDiv.className = 'status sent';
             } else if (status === 'red') {
               statusDiv.textContent = 'ОТКЛОНЁН';
               statusDiv.className = 'status rejected';
+              if (found.comment) {
+                commentBox.textContent = found.comment;
+                commentBox.style.display = 'block';
+              }
             } else {
               statusDiv.textContent = 'В МОДЕРАЦИИ';
               statusDiv.className = 'status moderation';
@@ -187,6 +200,7 @@
           console.error('Ошибка:', error);
           document.getElementById('statusOutput').textContent = 'ОШИБКА СВЯЗИ';
           document.getElementById('statusOutput').className = 'status moderation';
+          document.getElementById('commentBox').style.display = 'none';
           document.getElementById('statusOutput').style.display = 'flex';
         });
     }
@@ -194,7 +208,3 @@
 
 </body>
 </html>
-
-
-
-
