@@ -7,7 +7,7 @@
     body {
       background-color: #000;
       color: #fff;
-      font-family: 'Courier New', Courier, monospace;
+      font-family: 'Courier New', Courier, monospace; /* ← возвращён шрифт */
       margin: 0;
       padding: 20px;
       text-align: center;
@@ -32,37 +32,16 @@
       color: #aaa;
     }
 
-    .btn {
-      background-color: #333;
-      color: #fff;
-      border: 1px solid #555;
-      border-radius: 0;
-      padding: 12px 24px;
-      width: 150px;
-      height: 60px;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 16px;
-      cursor: pointer;
-      margin: 10px auto;
-      display: block;
-      transition: background-color 0.3s;
-    }
-
-    .input-container {
-      display: none;
-      margin-top: 30px;
-    }
-
     .input-field {
       width: 300px;
-      height: 60px;
+      height: 40px;
       background-color: #111;
       border: 1px solid #555;
       border-radius: 0;
       color: #fff;
-      font-family: 'Courier New', Courier, monospace;
+      font-family: 'Courier New', Courier, monospace; /* ← шрифт и в полях */
       font-size: 16px;
-      padding: 10px;
+      padding: 8px;
       margin: 10px auto;
       display: block;
       text-align: center;
@@ -70,6 +49,26 @@
 
     .input-field::placeholder {
       color: #777;
+    }
+
+    .btn {
+      background-color: #fff;
+      color: #000;
+      border: 1px solid #555;
+      border-radius: 0;
+      padding: 12px 20px;
+      width: 320px; /* ← чуть длиннее */
+      height: 50px;
+      font-family: 'Courier New', Courier, monospace; /* ← шрифт в кнопке */
+      font-size: 16px;
+      cursor: pointer;
+      margin: 15px auto;
+      display: block;
+      transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #ccc;
     }
 
     .status {
@@ -82,11 +81,13 @@
       display: none;
       min-height: 100px;
       display: flex;
-      align-items: center;
+      flex-direction: column;
       justify-content: center;
+      align-items: center;
       width: 300px;
-      height: 100px;
+      height: auto;
       margin: 30px auto;
+      line-height: 1.4;
     }
 
     .status.sent {
@@ -118,6 +119,7 @@
       width: 300px;
       margin: 15px auto;
       text-align: center;
+      font-family: 'Courier New', Courier, monospace; /* ← шрифт и в комментарии */
     }
   </style>
 </head>
@@ -127,28 +129,29 @@
     <h1>CDCULT Distribution</h1>
     <h2>УЗНАТЬ СОСТОЯНИЕ РЕЛИЗА</h2>
 
-    <button class="btn" id="showForm">УЗНАТЬ</button>
-
-    <div class="input-container" id="formContainer"></div>
+    <!-- Поля и кнопка друг под другом -->
+    <input type="text" class="input-field" id="releaseName" placeholder="Название релиза">
+    <input type="text" class="input-field" id="mainArtists" placeholder="Основные артисты">
+    <button class="btn" id="submitForm">ПРОВЕРИТЬ</button>
 
     <div class="status" id="statusOutput"></div>
     <div class="comment-box" id="commentBox" style="display: none;"></div>
-
   </div>
 
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxys4UPOAtqyKWbm-JXu0IAW9BMkGZtIHP5iZr6scDZdfU9KK5AQ3RkckEJmz-GKQA/exec';
 
-    document.getElementById('showForm').addEventListener('click', () => {
-      document.getElementById('showForm').style.display = 'none';
-      const formContainer = document.getElementById('formContainer');
-      formContainer.style.display = 'block';
-      formContainer.innerHTML = `
-        <input type="text" class="input-field" id="releaseName" placeholder="Название релиза">
-        <input type="text" class="input-field" id="mainArtists" placeholder="Основные артисты">
-        <button class="btn" id="submitForm">ПРОВЕРИТЬ</button>
-      `;
-      document.getElementById('submitForm').addEventListener('click', checkStatus);
+    const submitBtn = document.getElementById('submitForm');
+    const releaseInput = document.getElementById('releaseName');
+    const artistInput = document.getElementById('mainArtists');
+
+    // При изменении любого поля — показываем кнопку
+    releaseInput.addEventListener('input', () => {
+      submitBtn.style.display = 'block';
+    });
+
+    artistInput.addEventListener('input', () => {
+      submitBtn.style.display = 'block';
     });
 
     function checkStatus() {
@@ -170,13 +173,13 @@
 
           const statusDiv = document.getElementById('statusOutput');
           const commentBox = document.getElementById('commentBox');
-          commentBox.style.display = 'none'; // Сначала скрываем
+          commentBox.style.display = 'none';
 
           if (found) {
             const status = found.statusColor;
 
             if (status === 'green') {
-              statusDiv.textContent = 'ОДОБРЕН';
+              statusDiv.textContent = 'ОТПРАВЛЕН';
               statusDiv.className = 'status sent';
             } else if (status === 'red') {
               statusDiv.textContent = 'ОТКЛОНЁН';
@@ -195,6 +198,8 @@
           }
 
           statusDiv.style.display = 'flex';
+          // Скрываем кнопку "ПРОВЕРИТЬ"
+          submitBtn.style.display = 'none';
         })
         .catch(error => {
           console.error('Ошибка:', error);
@@ -202,11 +207,14 @@
           document.getElementById('statusOutput').className = 'status moderation';
           document.getElementById('commentBox').style.display = 'none';
           document.getElementById('statusOutput').style.display = 'flex';
+          // Скрываем кнопку при ошибке тоже
+          submitBtn.style.display = 'none';
         });
     }
+
+    // Привязываем обработчик к кнопке
+    submitBtn.addEventListener('click', checkStatus);
   </script>
 
 </body>
 </html>
-
-
