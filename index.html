@@ -71,25 +71,24 @@
       background-color: #ccc;
     }
 
-    .status {
-      margin-top: 30px;
-      padding: 20px;
-      font-weight: bold;
-      font-size: 18px;
-      text-align: center;
-      border-radius: 0;
-      display: none;
-      min-height: 100px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      width: 300px;
-      height: auto;
-      margin: 30px auto;
-      line-height: 1.4;
-    }
-
+   .status {
+  margin-top: 30px;
+  padding: 20px;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
+  border-radius: 0;
+  display: none;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 300px; /* ← изменено: теперь как у поля ввода */
+  height: auto;
+  margin: 30px auto; /* ← центрирование */
+  line-height: 1.4;
+}
     .status.sent {
       background-color: #1a471a;
       border: 2px solid #2ecc71;
@@ -218,3 +217,4 @@
 
 </body>
 </html>
+
