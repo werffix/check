@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>CDCULT DISTRIBUTION</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: 'Courier New', Courier, monospace;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 40px auto;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 24px;
+      font-weight: normal;
+      margin-bottom: 40px;
+      color: #aaa;
+    }
+
+    .btn {
+      background-color: #333;
+      color: #fff;
+      border: 1px solid #555;
+      border-radius: 0;
+      padding: 12px 24px;
+      width: 150px;
+      height: 60px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px auto;
+      display: block;
+      transition: background-color 0.3s;
+    }
+
+    .input-container {
+      display: none;
+      margin-top: 30px;
+    }
+
+    .input-field {
+      width: 300px;
+      height: 60px;
+      background-color: #111;
+      border: 1px solid #555;
+      border-radius: 0;
+      color: #fff;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 16px;
+      padding: 10px;
+      margin: 10px auto;
+      display: block;
+      text-align: center;
+    }
+
+    .input-field::placeholder {
+      color: #777;
+    }
+
+    .status {
+      margin-top: 30px;
+      padding: 20px;
+      font-weight: bold;
+      font-size: 18px;
+      text-align: center;
+      border-radius: 0;
+      display: none;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 300px;
+      height: 100px;
+      margin: 30px auto;
+    }
+
+    .status.sent {
+      background-color: #1a471a;
+      border: 2px solid #2ecc71;
+      color: #2ecc71;
+    }
+
+    .status.rejected {
+      background-color: #471a1a;
+      border: 2px solid #e74c3c;
+      color: #e74c3c;
+    }
+
+    .status.moderation {
+      background-color: #222;
+      border: 2px solid #555;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <h1>CDCULT Distribution</h1>
+    <h2>УЗНАТЬ СОСТОЯНИЕ РЕЛИЗА</h2>
+
+    <button class="btn" id="showForm">УЗНАТЬ</button>
+
+    <div class="input-container" id="formContainer"></div>
+
+    <div class="status" id="statusOutput"></div>
+
+  </div>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/[ВАШ_СКРИПТОВЫЙ_URL]/exec';
+
+    document.getElementById('showForm').addEventListener('click', () => {
+      // Скрываем кнопку "УЗНАТЬ"
+      document.getElementById('showForm').style.display = 'none';
+
+      // Показываем поля ввода
+      const formContainer = document.getElementById('formContainer');
+      formContainer.style.display = 'block';
+      formContainer.innerHTML = `
+        <input type="text" class="input-field" id="releaseName" placeholder="Название релиза">
+        <input type="text" class="input-field" id="mainArtists" placeholder="Основные артисты">
+        <button class="btn" id="submitForm">ПРОВЕРИТЬ</button>
+      `;
+
+      // Привязываем событие к новой кнопке
+      document.getElementById('submitForm').addEventListener('click', checkStatus);
+    });
+
+    function checkStatus() {
+      const releaseName = document.getElementById('releaseName').value.trim();
+      const mainArtists = document.getElementById('mainArtists').value.trim();
+
+      if (!releaseName || !mainArtists) {
+        alert('Пожалуйста, заполните оба поля');
+        return;
+      }
+
+      fetch(SCRIPT_URL)
+        .then(response => response.json())
+        .then(data => {
+          const found = data.find(item =>
+            item.releaseName.toLowerCase().includes(releaseName.toLowerCase()) &&
+            item.mainArtists.toLowerCase().includes(mainArtists.toLowerCase())
+          );
+
+          const statusDiv = document.getElementById('statusOutput');
+
+          if (found) {
+            const status = found.statusColor;
+            if (status === 'green') {
+              statusDiv.textContent = 'ОТПРАВЛЕН';
+              statusDiv.className = 'status sent';
+            } else if (status === 'red') {
+              statusDiv.textContent = 'ОТКЛОНЁН';
+              statusDiv.className = 'status rejected';
+            } else {
+              statusDiv.textContent = 'В МОДЕРАЦИИ';
+              statusDiv.className = 'status moderation';
+            }
+          } else {
+            statusDiv.textContent = 'НЕ НАЙДЕНО';
+            statusDiv.className = 'status moderation';
+          }
+
+          statusDiv.style.display = 'flex';
+        })
+        .catch(error => {
+          console.error('Ошибка:', error);
+          document.getElementById('statusOutput').textContent = 'ОШИБКА СВЯЗИ';
+          document.getElementById('statusOutput').className = 'status moderation';
+          document.getElementById('statusOutput').style.display = 'flex';
+        });
+    }
+  </script>
+
+</body>
+</html>
