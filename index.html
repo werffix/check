@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>CDCULT DISTRIBUTION</title>
+  <title>CDCULT Check</title>
   <style>
     body {
       background-color: #000;
@@ -112,7 +112,7 @@
 
   <div class="container">
 
-    <h1>CDCULT Distribution</h1>
+    <h1>CDCULT Check</h1>
     <h2>УЗНАТЬ СОСТОЯНИЕ РЕЛИЗА</h2>
 
     <button class="btn" id="showForm">УЗНАТЬ</button>
@@ -124,7 +124,7 @@
   </div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyjKvNwE_FLTi-2aPknYp5W_-8tzbVOqdNyXlvtIK1jxf5A1wms-p1RoDkvcE4vTZE/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjvB_u2ok2UgkKEkKuFMwZT5L0LwO_xFLbiEyXENLfx72zkCcL6wf41jCRrHfq0HA/exec';
 
     document.getElementById('showForm').addEventListener('click', () => {
       // Скрываем кнопку "УЗНАТЬ"
@@ -143,53 +143,49 @@
       document.getElementById('submitForm').addEventListener('click', checkStatus);
     });
 
-    function checkStatus() {
-      const releaseName = document.getElementById('releaseName').value.trim();
-      const mainArtists = document.getElementById('mainArtists').value.trim();
+   function checkStatus() {
+  const releaseName = document.getElementById('releaseName').value.trim();
+  const mainArtists = document.getElementById('mainArtists').value.trim();
 
-      if (!releaseName || !mainArtists) {
-        alert('Пожалуйста, заполните оба поля');
-        return;
+  if (!releaseName || !mainArtists) {
+    alert('Пожалуйста, заполните оба поля');
+    return;
+  }
+
+  fetch(SCRIPT_URL)
+    .then(response => response.json())
+    .then(data => {
+      // 🔍 ИЩЕМ ТОЧНОЕ СОВПАДЕНИЕ
+      const found = data.find(item =>
+        item.releaseName === releaseName &&
+        item.mainArtists === mainArtists
+      );
+
+      const statusDiv = document.getElementById('statusOutput');
+
+      if (found) {
+        const status = found.statusColor;
+        if (status === 'green') {
+          statusDiv.textContent = 'ОТПРАВЛЕН';
+          statusDiv.className = 'status sent';
+        } else if (status === 'red') {
+          statusDiv.textContent = 'ОТКЛОНЁН';
+          statusDiv.className = 'status rejected';
+        } else {
+          statusDiv.textContent = 'В МОДЕРАЦИИ';
+          statusDiv.className = 'status moderation';
+        }
+      } else {
+        statusDiv.textContent = 'НЕ НАЙДЕНО';
+        statusDiv.className = 'status moderation';
       }
 
-      fetch(SCRIPT_URL)
-        .then(response => response.json())
-        .then(data => {
-          const found = data.find(item =>
-            item.releaseName.toLowerCase().includes(releaseName.toLowerCase()) &&
-            item.mainArtists.toLowerCase().includes(mainArtists.toLowerCase())
-          );
-
-          const statusDiv = document.getElementById('statusOutput');
-
-          if (found) {
-            const status = found.statusColor;
-            if (status === 'green') {
-              statusDiv.textContent = 'ОТПРАВЛЕН';
-              statusDiv.className = 'status sent';
-            } else if (status === 'red') {
-              statusDiv.textContent = 'ОТКЛОНЁН';
-              statusDiv.className = 'status rejected';
-            } else {
-              statusDiv.textContent = 'В МОДЕРАЦИИ';
-              statusDiv.className = 'status moderation';
-            }
-          } else {
-            statusDiv.textContent = 'НЕ НАЙДЕНО';
-            statusDiv.className = 'status moderation';
-          }
-
-          statusDiv.style.display = 'flex';
-        })
-        .catch(error => {
-          console.error('Ошибка:', error);
-          document.getElementById('statusOutput').textContent = 'ОШИБКА СВЯЗИ';
-          document.getElementById('statusOutput').className = 'status moderation';
-          document.getElementById('statusOutput').style.display = 'flex';
-        });
-    }
-  </script>
-
-</body>
-
-</html>
+      statusDiv.style.display = 'flex';
+    })
+    .catch(error => {
+      console.error('Ошибка:', error);
+      document.getElementById('statusOutput').textContent = 'ОШИБКА СВЯЗИ';
+      document.getElementById('statusOutput').className = 'status moderation';
+      document.getElementById('statusOutput').style.display = 'flex';
+    });
+}
